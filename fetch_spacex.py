@@ -10,20 +10,24 @@ def fetch_spacex_last_launch():
     }
     response = requests.get(url="https://api.spacexdata.com/v3/launches/latest", params=payload)
     photo_links = json.loads(response.text)
+    print(photo_links)
     urls = photo_links["links"]["flickr_images"]
+    print(urls)
 
-    if not os.path.exists('imagesX'):
-        os.makedirs('imagesX')
+    os.makedirs('imagesX', exist_ok=True)
 
     for num, url in enumerate(urls, 1):
         response = requests.get(url)
         response.raise_for_status()
-        photo_name = 'SpaceX_' + str(num) + '.jpg'
+        photo_name = f'SpaceX_{str(num)}.jpg'
+        print(photo_name)
 
-        photo_path = joinpath(os.path.abspath('imagesX'), photo_name)
+        path = os.path.abspath('imagesX')
+        photo_path = joinpath(path, photo_name)
+        print(photo_path)
 
-        with open(photo_path, 'wb') as file:
-            file.write(response.content)
+        with open(photo_path, 'wb') as photo:
+            photo.write(response.content)
 
 
 def main():

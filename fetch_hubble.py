@@ -14,9 +14,9 @@ args = parser.parse_args()
 def fetch_hubble_collection(id_photo):
     url_template = "http://hubblesite.org/api/v3/image/{}"
     url_photo_id = url_template.format(id_photo)
-    r = requests.get(url_photo_id)
-    r.raise_for_status()
-    links_photo = json.loads(r.text)
+    response_id_photo = requests.get(url_photo_id)
+    response_id_photo.raise_for_status()
+    links_photo = json.loads(response_id_photo.text)
     print(f'loading ... id{id_photo}')
     photos = links_photo['image_files']
     data_photos = {'description': dict(id=id_photo, name=links_photo['name'])}
@@ -26,23 +26,21 @@ def fetch_hubble_collection(id_photo):
         split = urlparse(photo.get('file_url'))
         split_netloc = split[1].split('.')[1:]
         split_path = split[2].split('/')[2:]
-        link = 'http://' + '.'.join(split_netloc) + '/' + '/'.join(split_path)
+        link = f"http://{'.'.join(split_netloc)}/{'/'.join(split_path)}"
         links[num] = link
     data_photos[name_photo] = links
-    resp = requests.get(data_photos[name_photo][args.n])
-    resp.raise_for_status()
+    response = requests.get(data_photos[name_photo][args.n])
+    response.raise_for_status()
 
-    if not os.path.exists('imagesH'):
-        os.makedirs('imagesH')
+    os.makedirs('imagesH', exist_ok=True)
 
-    expansion_photo = '.' + data_photos[name_photo][args.n].split('.')[-1]
-    image_name = 'Hubble_id{}_'.format(id_photo) + str(args.n) + expansion_photo
+    expansion_photo = data_photos[name_photo][args.n].split('.')[-1]
+    image_name = f'Hubble_id{id_photo}_{str(args.n)}.{expansion_photo}'
     image_path = joinpath(os.path.abspath('imagesH'), image_name)
     data_photos['description']['path'] = image_name
-    print(data_photos)
 
     with open(image_path, 'wb') as image:
-        image.write(resp.content)
+        image.write(response.content)
 
     return data_photos
 
