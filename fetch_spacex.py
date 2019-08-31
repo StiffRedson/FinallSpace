@@ -1,7 +1,7 @@
+from os.path import join as joinpath
 import requests
 import json
 import os
-from os.path import join as joinpath
 
 
 def fetch_spacex_last_launch():

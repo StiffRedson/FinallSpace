@@ -1,7 +1,7 @@
-from os.path import join as joinpath
 from PIL import Image
 import argparse
 import os
+from os.path import join as joinpath
 
 
 def create_parser():

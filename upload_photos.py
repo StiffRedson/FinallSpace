@@ -4,9 +4,9 @@ import os
 import time
 from os import listdir
 from os.path import isfile
-from os.path import join as joinpath
 from dotenv import load_dotenv
 from instabot import Bot
+from os.path import join as joinpath
 
 
 def create_parser():

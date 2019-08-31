@@ -1,17 +1,20 @@
 import argparse
 from urllib.parse import urlparse
-from os.path import join as joinpath
 import requests
 import json
 import os
-
-parser = argparse.ArgumentParser(add_help=True)
-parser.add_argument('-c', type=str, help="collection name")
-parser.add_argument('-n', type=int, help="number photo")
-args = parser.parse_args()
+from os.path import join as joinpath
 
 
-def fetch_hubble_collection(id_photo):
+def create_parser():
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument('-c', type=str, help="collection name")
+    parser.add_argument('-n', type=int, help="number photo")
+    args = parser.parse_args()
+    return args.c, args.n
+
+
+def fetch_hubble_collection(id_photo, number_dictionary):
     url_template = "http://hubblesite.org/api/v3/image/{}"
     url_photo_id = url_template.format(id_photo)
     response_id_photo = requests.get(url_photo_id)
@@ -29,13 +32,13 @@ def fetch_hubble_collection(id_photo):
         link = f"http://{'.'.join(split_netloc)}/{'/'.join(split_path)}"
         links[num] = link
     data_photos[name_photo] = links
-    response = requests.get(data_photos[name_photo][args.n])
+    response = requests.get(data_photos[name_photo][number_dictionary])
     response.raise_for_status()
 
     os.makedirs('imagesH', exist_ok=True)
 
-    expansion_photo = data_photos[name_photo][args.n].split('.')[-1]
-    image_name = f'Hubble_id{id_photo}_{str(args.n)}.{expansion_photo}'
+    expansion_photo = data_photos[name_photo][number_dictionary].split('.')[-1]
+    image_name = f'Hubble_id{id_photo}_{str(number_dictionary)}.{expansion_photo}'
     image_path = joinpath(os.path.abspath('imagesH'), image_name)
     data_photos['description']['path'] = image_name
 
@@ -64,10 +67,11 @@ def get_id_photo(collection):
 
 
 def main():
-    collection = args.c
+    collection = create_parser()[0]
+    number_checklist = create_parser()[1]
     json_data = []
     for index in get_id_photo(collection):
-        json_data.append(fetch_hubble_collection(index))
+        json_data.append(fetch_hubble_collection(index, number_checklist))
         with open("info_photo.json", 'w') as file:
             json.dump(json_data, file, indent=2)
 
